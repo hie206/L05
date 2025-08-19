@@ -1,0 +1,126 @@
+import java.math.BigInteger;
+import java.util.Scanner;
+
+public class FractionArray {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Nhập số lượng phân số: ");
+        int n = sc.nextInt();
+        sc.nextLine();
+
+        if (n <= 0) {
+            System.out.println("Số lượng phải > 0.");
+            sc.close();
+            return;
+        }
+
+        Fraction[] arr = new Fraction[n];
+        for (int i = 0; i < n; i++) {
+            System.out.print("Nhập phân số thứ " + (i + 1) + " (định dạng a/b hoặc a): ");
+            String token = sc.next().trim();
+            try {
+                arr[i] = parseFraction(token);
+            } catch (IllegalArgumentException ex) {
+                System.out.println("Lỗi: " + ex.getMessage());
+                i--; 
+            }
+        }
+
+        System.out.println("\nMảng phân số đã nhập:");
+        for (int i = 0; i < n; i++) {
+            System.out.println((i + 1) + ": " + arr[i]);
+        }
+
+        Fraction sum = new Fraction(0); 
+        Fraction prod = new Fraction(1); 
+        for (Fraction f : arr) {
+            sum = sum.add(f);
+            prod = prod.multiply(f);
+        }
+
+        int idxMax = 0;
+        for (int i = 1; i < n; i++) {
+            if (arr[i].compareTo(arr[idxMax]) > 0) {
+                idxMax = i;
+            }
+        }
+
+        System.out.println("\nKết quả:");
+        System.out.println("Tổng các phân số: " + sum);
+        System.out.println("Tích các phân số: " + prod);
+        System.out.println("Phân số có giá trị lớn nhất: vị trí " + (idxMax + 1) + " -> " + arr[idxMax]);
+
+        sc.close();
+    }
+
+    private static Fraction parseFraction(String s) {
+        if (s.contains("/")) {
+            String[] parts = s.split("/");
+            if (parts.length != 2) throw new IllegalArgumentException("Định dạng phân số không đúng: " + s);
+            BigInteger a = new BigInteger(parts[0].trim());
+            BigInteger b = new BigInteger(parts[1].trim());
+            return new Fraction(a, b);
+        } else {
+            BigInteger a = new BigInteger(s);
+            return new Fraction(a, BigInteger.ONE);
+        }
+    }
+
+    // Lớp Fraction sử dụng BigInteger (immutable)
+    static class Fraction implements Comparable<Fraction> {
+        private final BigInteger num; 
+        private final BigInteger den; 
+
+        public Fraction(BigInteger num, BigInteger den) {
+            if (den == null || den.equals(BigInteger.ZERO)) {
+                throw new IllegalArgumentException("Mẫu số không được bằng 0.");
+            }
+            if (den.signum() < 0) {
+                den = den.negate();
+                num = num.negate();
+            }
+            BigInteger g = num.abs().gcd(den); 
+            if (!g.equals(BigInteger.ZERO)) {
+                num = num.divide(g);
+                den = den.divide(g);
+            }
+            this.num = num;
+            this.den = den;
+        }
+
+        public Fraction(long n) {
+            this(BigInteger.valueOf(n), BigInteger.ONE);
+        }
+
+        public Fraction add(Fraction other) {
+            BigInteger n = this.num.multiply(other.den).add(other.num.multiply(this.den));
+            BigInteger d = this.den.multiply(other.den);
+            return new Fraction(n, d);
+        }
+
+        public Fraction multiply(Fraction other) {
+            BigInteger n = this.num.multiply(other.num);
+            BigInteger d = this.den.multiply(other.den);
+            return new Fraction(n, d);
+        }
+
+        public int compareTo(Fraction other) {
+            BigInteger left = this.num.multiply(other.den);
+            BigInteger right = other.num.multiply(this.den);
+            return left.compareTo(right);
+        }
+
+        public BigInteger getNumerator() { return num; }
+        public BigInteger getDenominator() { return den; }
+
+
+        public String toString() {
+            if (den.equals(BigInteger.ONE)) {
+                return num.toString();
+            } else {
+                return num.toString() + "/" + den.toString();
+            }
+        }
+    }
+}
