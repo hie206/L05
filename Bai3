@@ -1,0 +1,56 @@
+import java.util.Scanner;
+
+public class DistanceCalculator {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("Nhập điểm 1 (x và y, cách nhau bởi dấu cách): ");
+        double x1 = readDouble(sc);
+        double y1 = readDouble(sc);
+        Point p1 = new Point(x1, y1);
+
+        System.out.println("Nhập điểm 2 (x và y, cách nhau bởi dấu cách): ");
+        double x2 = readDouble(sc);
+        double y2 = readDouble(sc);
+        Point p2 = new Point(x2, y2);
+
+        System.out.println("\nĐiểm đã nhập:");
+        System.out.println("P1 = " + p1);
+        System.out.println("P2 = " + p2);
+
+        double dist = p1.distanceTo(p2);
+        System.out.printf("\nKhoảng cách giữa P1 và P2: %.4f%n", dist);
+
+        sc.close();
+    }
+
+    private static double readDouble(Scanner sc) {
+        while (!sc.hasNextDouble()) {
+            System.out.print("Giá trị không hợp lệ. Nhập lại: ");
+            sc.next(); 
+        }
+        return sc.nextDouble();
+    }
+
+    static class Point {
+        private final double x;
+        private final double y;
+
+        public Point(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public double getX() { return x; }
+        public double getY() { return y; }
+
+        public double distanceTo(Point other) {
+            return Math.hypot(other.x - this.x, other.y - this.y);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("(%.4f, %.4f)", x, y);
+        }
+    }
+}
