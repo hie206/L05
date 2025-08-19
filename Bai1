@@ -1,0 +1,133 @@
+import java.util.Scanner;
+
+public class FractionCalculator {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("Nhập phân số 1 (định dạng a/b hoặc số nguyên): ");
+        Fraction f1 = parseFraction(sc.next().trim());
+
+        System.out.println("Nhập phân số 2 (định dạng a/b hoặc số nguyên): ");
+        Fraction f2 = parseFraction(sc.next().trim());
+
+        System.out.println("\nPhân số đã nhập:");
+        System.out.println("f1 = " + f1);
+        System.out.println("f2 = " + f2);
+
+        Fraction sum = f1.add(f2);
+        Fraction diff = f1.subtract(f2);
+        Fraction prod = f1.multiply(f2);
+        Fraction quot = null;
+        try {
+            quot = f1.divide(f2);
+        } catch (ArithmeticException e) {
+        
+        }
+
+        System.out.println("\nKết quả các phép toán (đã rút gọn):");
+        System.out.println("f1 + f2 = " + sum);
+        System.out.println("f1 - f2 = " + diff);
+        System.out.println("f1 * f2 = " + prod);
+        if (quot != null) {
+            System.out.println("f1 / f2 = " + quot);
+        } else {
+            System.out.println("f1 / f2 = (không xác định: chia cho 0)");
+        }
+
+        sc.close();
+    }
+
+    private static Fraction parseFraction(String s) {
+        if (s.contains("/")) {
+            String[] parts = s.split("/");
+            if (parts.length != 2) throw new IllegalArgumentException("Định dạng phân số không đúng: " + s);
+            long a = Long.parseLong(parts[0].trim());
+            long b = Long.parseLong(parts[1].trim());
+            return new Fraction(a, b);
+        } else {
+            long a = Long.parseLong(s);
+            return new Fraction(a, 1);
+        }
+    }
+}
+
+class Fraction {
+    private final long num; // tử
+    private final long den; // mẫu (luôn > 0 sau chuẩn hoá)
+
+    public Fraction(long num, long den) {
+        if (den == 0) {
+            throw new IllegalArgumentException("Mẫu số không được bằng 0.");
+        }
+        if (den < 0) {
+            den = -den;
+            num = -num;
+        }
+        long g = gcd(Math.abs(num), Math.abs(den));
+        this.num = num / g;
+        this.den = den / g;
+    }
+
+    public Fraction(long num) {
+        this(num, 1);
+    }
+
+    public Fraction add(Fraction other) {
+        long n = safeAdd(safeMul(this.num, other.den), safeMul(other.num, this.den));
+        long d = safeMul(this.den, other.den);
+        return new Fraction(n, d);
+    }
+
+    public Fraction subtract(Fraction other) {
+        long n = safeAdd(safeMul(this.num, other.den), -safeMul(other.num, this.den));
+        long d = safeMul(this.den, other.den);
+        return new Fraction(n, d);
+    }
+
+    public Fraction multiply(Fraction other) {
+        long n = safeMul(this.num, other.num);
+        long d = safeMul(this.den, other.den);
+        return new Fraction(n, d);
+    }
+
+    public Fraction divide(Fraction other) {
+        if (other.num == 0) {
+            throw new ArithmeticException("Chia cho phân số 0 (không xác định).");
+        }
+        long n = safeMul(this.num, other.den);
+        long d = safeMul(this.den, other.num);
+        if (d < 0) { n = -n; d = -d; } // chuẩn hoá
+        return new Fraction(n, d);
+    }
+
+    public long getNumerator() {
+        return num;
+    }
+
+    public long getDenominator() {
+        return den;
+    }
+
+    public String toString() {
+        if (den == 1) return Long.toString(num);
+        return num + "/" + den;
+    }
+
+    private static long gcd(long a, long b) {
+        if (a == 0 && b == 0) return 1;
+        while (b != 0) {
+            long t = a % b;
+            a = b;
+            b = t;
+        }
+        return Math.abs(a);
+    }
+
+    private static long safeMul(long x, long y) {
+        return x * y;
+    }
+
+    private static long safeAdd(long x, long y) {
+        return x + y;
+    }
+}
