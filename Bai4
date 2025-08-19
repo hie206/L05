@@ -1,0 +1,166 @@
+import java.util.Scanner;
+
+public class TriangleCalculator {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("=== Tính chu vi và diện tích tam giác ===");
+        System.out.println("Chọn cách nhập tam giác:");
+        System.out.println("1 - Nhập 3 điểm (tọa độ Oxy)");
+        System.out.println("2 - Nhập 3 cạnh (độ dài)");
+        System.out.print("Lựa chọn (1 hoặc 2): ");
+
+        int choice = readChoice(sc, 1, 2);
+
+        Triangle tri = null;
+        if (choice == 1) {
+            System.out.println("Nhập điểm A (x y): ");
+            double ax = readDouble(sc);
+            double ay = readDouble(sc);
+            System.out.println("Nhập điểm B (x y): ");
+            double bx = readDouble(sc);
+            double by = readDouble(sc);
+            System.out.println("Nhập điểm C (x y): ");
+            double cx = readDouble(sc);
+            double cy = readDouble(sc);
+
+            Point A = new Point(ax, ay);
+            Point B = new Point(bx, by);
+            Point C = new Point(cx, cy);
+            try {
+                tri = new Triangle(A, B, C);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Lỗi: " + e.getMessage());
+                System.out.println("Kết thúc chương trình.");
+                sc.close();
+                return;
+            }
+        } else {
+            System.out.println("Nhập độ dài 3 cạnh (a b c): ");
+            double a = readPositiveDouble(sc);
+            double b = readPositiveDouble(sc);
+            double c = readPositiveDouble(sc);
+            try {
+                tri = new Triangle(a, b, c);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Lỗi: " + e.getMessage());
+                System.out.println("Kết thúc chương trình.");
+                sc.close();
+                return;
+            }
+        }
+
+        System.out.println("\nTam giác đã nhập: " + tri);
+        System.out.printf("Chu vi: %.6f%n", tri.getPerimeter());
+        System.out.printf("Diện tích: %.6f%n", tri.getArea());
+
+        sc.close();
+    }
+
+    private static int readChoice(Scanner sc, int min, int max) {
+        while (!sc.hasNextInt()) {
+            System.out.print("Không hợp lệ. Nhập lại: ");
+            sc.next();
+        }
+        int v = sc.nextInt();
+        while (v < min || v > max) {
+            System.out.print("Lựa chọn phải là " + min + " hoặc " + max + ". Nhập lại: ");
+            while (!sc.hasNextInt()) {
+                System.out.print("Không hợp lệ. Nhập lại: ");
+                sc.next();
+            }
+            v = sc.nextInt();
+        }
+        return v;
+    }
+
+    private static double readDouble(Scanner sc) {
+        while (!sc.hasNextDouble()) {
+            System.out.print("Không hợp lệ. Nhập lại số thực: ");
+            sc.next();
+        }
+        return sc.nextDouble();
+    }
+
+    private static double readPositiveDouble(Scanner sc) {
+        double v = readDouble(sc);
+        while (v <= 0) {
+            System.out.print("Phải là số dương. Nhập lại: ");
+            v = readDouble(sc);
+        }
+        return v;
+    }
+
+    static class Point {
+        private final double x;
+        private final double y;
+
+        public Point(double x, double y) { this.x = x; this.y = y; }
+
+        public double getX() { return x; }
+        public double getY() { return y; }
+
+        public double distanceTo(Point other) {
+            return Math.hypot(this.x - other.x, this.y - other.y);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("(%.4f, %.4f)", x, y);
+        }
+    }
+
+    // ----- Lớp Triangle -----
+    static class Triangle {
+        private final double a; 
+        private final double b; 
+        private final double c; 
+
+        public Triangle(double a, double b, double c) {
+            if (!isValidSides(a, b, c)) {
+                throw new IllegalArgumentException("Ba cạnh không thỏa bất đẳng thức tam giác.");
+            }
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+
+        public Triangle(Point A, Point B, Point C) {
+            double ab = A.distanceTo(B);
+            double bc = B.distanceTo(C);
+            double ca = C.distanceTo(A);
+            if (!isValidSides(ab, bc, ca)) {
+                throw new IllegalArgumentException("3 điểm cho 1 tam giác không hợp lệ (có thể thẳng hàng hoặc tạo cạnh 0).");
+            }
+            this.a = bc; // a = BC
+            this.b = ca; // b = CA
+            this.c = ab; // c = AB
+        }
+
+        private static boolean isValidSides(double a, double b, double c) {
+            double eps = 1e-12;
+            if (a <= eps || b <= eps || c <= eps) return false;
+            return a + b > c + eps && a + c > b + eps && b + c > a + eps;
+        }
+
+        public double getPerimeter() {
+            return a + b + c;
+        }
+
+        public double getArea() {
+            double s = getPerimeter() / 2.0;
+            double val = s * (s - a) * (s - b) * (s - c);
+            if (val < 0 && val > -1e-12) val = 0;
+            return Math.sqrt(Math.max(0, val));
+        }
+
+        public double getA() { return a; }
+        public double getB() { return b; }
+        public double getC() { return c; }
+
+        @Override
+        public String toString() {
+            return String.format("các cạnh a=%.6f, b=%.6f, c=%.6f", a, b, c);
+        }
+    }
+}
