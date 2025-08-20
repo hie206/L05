@@ -1,0 +1,46 @@
+import java.util.Scanner;
+
+public class JaggedArrayExample {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Nhập số dòng: ");
+        int m = sc.nextInt();
+
+        int[][] jagged = new int[m][];
+        
+        for (int i = 0; i < m; i++) {
+            System.out.printf("Nhập số phần tử của dòng %d: ", i);
+            int n = sc.nextInt();
+            jagged[i] = new int[n];
+
+            for (int j = 0; j < n; j++) {
+                System.out.printf("jagged[%d][%d] = ", i, j);
+                jagged[i][j] = sc.nextInt();
+            }
+        }
+
+        int maxRowLengthIndex = 0;
+        for (int i = 1; i < m; i++) {
+            if (jagged[i].length > jagged[maxRowLengthIndex].length) {
+                maxRowLengthIndex = i;
+            }
+        }
+
+        int maxValue = jagged[0][0];
+        int maxValueRowIndex = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < jagged[i].length; j++) {
+                if (jagged[i][j] > maxValue) {
+                    maxValue = jagged[i][j];
+                    maxValueRowIndex = i;
+                }
+            }
+        }
+
+        System.out.println("Dòng có nhiều phần tử nhất: " + maxRowLengthIndex);
+        System.out.println("Dòng chứa phần tử lớn nhất (" + maxValue + "): " + maxValueRowIndex);
+
+        sc.close();
+    }
+}
