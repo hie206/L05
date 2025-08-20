@@ -1,0 +1,85 @@
+import java.util.Scanner;
+
+public class PolygonCalculator {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Nhập số đỉnh của đa giác lồi: ");
+        int n = sc.nextInt();
+        if (n < 3) {
+            System.out.println("Một đa giác phải có ít nhất 3 đỉnh!");
+            sc.close();
+            return;
+        }
+
+        Point[] vertices = new Point[n];
+        for (int i = 0; i < n; i++) {
+            System.out.printf("Nhập tọa độ đỉnh %d (x y): ", i + 1);
+            double x = sc.nextDouble();
+            double y = sc.nextDouble();
+            vertices[i] = new Point(x, y);
+        }
+
+        Polygon polygon = new Polygon(vertices);
+
+        System.out.println("\nDanh sách đỉnh đa giác:");
+        for (int i = 0; i < n; i++) {
+            System.out.println("Đỉnh " + (i + 1) + ": " + vertices[i]);
+        }
+
+        System.out.printf("Chu vi đa giác = %.6f%n", polygon.getPerimeter());
+        System.out.printf("Diện tích đa giác = %.6f%n", polygon.getArea());
+
+        sc.close();
+    }
+}
+
+class Point {
+    private final double x;
+    private final double y;
+
+    public Point(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public double getX() { return x; }
+    public double getY() { return y; }
+
+    public double distanceTo(Point other) {
+        return Math.hypot(this.x - other.x, this.y - other.y);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("(%.4f, %.4f)", x, y);
+    }
+}
+
+class Polygon {
+    private final Point[] vertices;
+
+    public Polygon(Point[] vertices) {
+        this.vertices = vertices;
+    }
+
+    public double getPerimeter() {
+        double peri = 0;
+        int n = vertices.length;
+        for (int i = 0; i < n; i++) {
+            peri += vertices[i].distanceTo(vertices[(i + 1) % n]);
+        }
+        return peri;
+    }
+
+    public double getArea() {
+        double sum = 0;
+        int n = vertices.length;
+        for (int i = 0; i < n; i++) {
+            Point p1 = vertices[i];
+            Point p2 = vertices[(i + 1) % n];
+            sum += (p1.getX() * p2.getY() - p2.getX() * p1.getY());
+        }
+        return Math.abs(sum) / 2.0;
+    }
+}
